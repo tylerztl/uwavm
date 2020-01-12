@@ -3,7 +3,6 @@ package gowasm
 import (
 	"time"
 
-	"github.com/BeDreamCoder/uwavm/debug"
 	"github.com/BeDreamCoder/uwavm/exec"
 	"github.com/BeDreamCoder/uwavm/runtime/go/js"
 	"github.com/BeDreamCoder/uwavm/runtime/go/js/fs"
@@ -52,7 +51,7 @@ func (rt *Runtime) wasmExit(code int32) {
 func (rt *Runtime) wasmWrite(fd int64, p int64, n int32) {
 	codec := exec.NewCodec(rt.ctx)
 	if fd == 1 || fd == 2 {
-		debug.Write(rt.ctx, codec.Bytes(uint32(p), uint32(n)))
+		exec.Write(rt.ctx, codec.Bytes(uint32(p), uint32(n)))
 	}
 }
 

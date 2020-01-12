@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/BeDreamCoder/uwavm/debug"
 	"github.com/BeDreamCoder/uwavm/exec"
 	gowasm "github.com/BeDreamCoder/uwavm/runtime/go"
 )
@@ -74,7 +73,7 @@ func run(modulePath string, args []string) error {
 	}
 
 	defer ctx.Release()
-	debug.SetWriter(ctx, os.Stderr)
+	exec.SetWriter(ctx, os.Stderr)
 	var entry string
 	switch *environ {
 	case "go":
