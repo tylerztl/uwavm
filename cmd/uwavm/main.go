@@ -57,7 +57,10 @@ func run(modulePath string, args []string) error {
 	if err != nil {
 		return err
 	}
-	resolver := exec.NewMultiResolver(gowasm.NewResolver(), syscall.NewSyscallResolver(bridge.NewSyscallService(bridge.NewContextManager())))
+
+	ctxmgr := bridge.NewContextManager()
+	ctxmgr.MakeContext()
+	resolver := exec.NewMultiResolver(gowasm.NewResolver(), syscall.NewSyscallResolver(bridge.NewSyscallService(ctxmgr)))
 	var code exec.Code
 	codebuf, err := ioutil.ReadFile(modulePath)
 	if err != nil {
@@ -82,6 +85,8 @@ func run(modulePath string, args []string) error {
 		entry = "run"
 		gowasm.RegisterRuntime(ctx)
 	}
+
+	ctx.SetUserData(bridge.ContextIDKey, int64(1))
 
 	var argc, argv int
 	if ctx.Memory() != nil {

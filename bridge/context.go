@@ -7,6 +7,8 @@ import (
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
 )
 
+const ContextIDKey = "ctxid"
+
 // Context 保存了合约执行的内核状态，
 // 所有的系统调用产生的状态保存在这里
 type Context struct {

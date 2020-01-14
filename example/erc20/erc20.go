@@ -295,5 +295,6 @@ func (e *erc20) Query(ctx code.Context) code.Response {
 }
 
 func main() {
+	println("Init erc20 contract.")
 	driver.Serve(newERC20())
 }
