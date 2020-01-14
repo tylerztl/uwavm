@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/BeDreamCoder/uwavm/bridge"
+	"github.com/BeDreamCoder/uwavm/bridge/syscall"
 	"github.com/BeDreamCoder/uwavm/exec"
 	gowasm "github.com/BeDreamCoder/uwavm/runtime/go"
 )
@@ -55,7 +57,7 @@ func run(modulePath string, args []string) error {
 	if err != nil {
 		return err
 	}
-	resolver := exec.NewMultiResolver(resolver, gowasm.NewResolver())
+	resolver := exec.NewMultiResolver(gowasm.NewResolver(), syscall.NewSyscallResolver(bridge.NewSyscallService(bridge.NewContextManager())))
 	var code exec.Code
 	codebuf, err := ioutil.ReadFile(modulePath)
 	if err != nil {
