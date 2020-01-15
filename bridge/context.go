@@ -3,7 +3,7 @@ package bridge
 import (
 	"sync"
 
-	"github.com/BeDreamCoder/uwavm/common/db/memorydb"
+	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
 )
 
@@ -16,7 +16,7 @@ type Context struct {
 	// 合约名字
 	ContractName string
 
-	Cache *memorydb.LRUCache
+	Cache db.Database
 
 	Args map[string][]byte
 

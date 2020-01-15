@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"sync"
 
+	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 )
@@ -26,7 +27,7 @@ func NewProvider() *Provider {
 }
 
 // GetDBHandle returns a handle to a named db
-func (p *Provider) GetDBHandle(dbName string) *DBHandle {
+func (p *Provider) GetDBHandle(dbName string) db.Database {
 	p.mux.Lock()
 	defer p.mux.Unlock()
 	dbHandle := p.dbHandles[dbName]
@@ -35,11 +36,6 @@ func (p *Provider) GetDBHandle(dbName string) *DBHandle {
 		p.dbHandles[dbName] = dbHandle
 	}
 	return dbHandle
-}
-
-// Close closes the underlying leveldb
-func (p *Provider) Close() {
-	p.db.Close()
 }
 
 // DBHandle is an handle to a named db
@@ -95,6 +91,10 @@ func (h *DBHandle) GetIterator(startKey []byte, endKey []byte) *Iterator {
 	}
 	logger.Error("Getting iterator for range ", sKey, eKey)
 	return &Iterator{h.db.GetIterator(sKey, eKey)}
+}
+
+func (h *DBHandle) Close() {
+	h.db.Close()
 }
 
 // UpdateBatch encloses the details of multiple `updates`

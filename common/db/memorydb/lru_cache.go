@@ -25,11 +25,12 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/common/log"
 	"github.com/pkg/errors"
 )
 
-var logger = log.New("uwavm", "leveldb")
+var logger = log.New("uwavm", "memorydb")
 
 // LRUCache cache struct
 type LRUCache struct {
@@ -41,12 +42,12 @@ type LRUCache struct {
 
 // Pair <key, value>
 type Pair struct {
-	key   interface{} // cache key
-	value interface{} // cache value
+	key   []byte // cache key
+	value []byte // cache value
 }
 
 // NewLRUCache New function
-func NewLRUCache(capacity int) *LRUCache {
+func NewLRUCache(capacity int) db.Database {
 	c := new(LRUCache)
 	c.capacity = capacity
 	c.cache = make(map[interface{}]*list.Element)
@@ -60,7 +61,7 @@ func NewLRUCache(capacity int) *LRUCache {
 // Return:
 //     - value: cache value
 //     - ok   : true if found, false if not
-func (c *LRUCache) Get(key interface{}) (interface{}, error) {
+func (c *LRUCache) Get(key []byte) ([]byte, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if elem, ok := c.cache[key]; ok {
@@ -77,7 +78,7 @@ func (c *LRUCache) Get(key interface{}) (interface{}, error) {
 //     - value: cache value
 // Return:
 //     - evictOrNot: true if eviction occurs, false if not
-func (c *LRUCache) Put(key interface{}, value interface{}) error {
+func (c *LRUCache) Put(key []byte, value []byte) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	// update item if found in cache
@@ -112,7 +113,7 @@ func (c *LRUCache) evict() {
 // Del delete cached value from cache
 // Params:
 //     - key: cache key
-func (c *LRUCache) Delete(key interface{}) error {
+func (c *LRUCache) Delete(key []byte) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if elem, ok := c.cache[key]; ok {
@@ -155,4 +156,8 @@ func (c *LRUCache) EnlargeCapacity(newCapacity int) error {
 	}
 	c.capacity = newCapacity
 	return nil
+}
+
+func (c *LRUCache) Close() {
+	logger.Warn("unimplemented")
 }

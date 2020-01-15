@@ -38,8 +38,8 @@ func (c *SyscallService) PutObject(ctx context.Context, in *pb.PutRequest) (*pb.
 		return nil, errors.New("put nil value")
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	ok = nctx.Cache.Put(compk, in.Value)
-	if !ok {
+	err := nctx.Cache.Put([]byte(compk), in.Value)
+	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Failed to PutObject for key:[%s],value:[%s]", compk, string(in.Value)))
 	}
 
@@ -53,12 +53,12 @@ func (c *SyscallService) GetObject(ctx context.Context, in *pb.GetRequest) (*pb.
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	value, ok := nctx.Cache.Get(compk)
-	if !ok {
+	value, err := nctx.Cache.Get([]byte(compk))
+	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Cant GetObject for key: [%s]", compk))
 	}
 	return &pb.GetResponse{
-		Value: value.([]byte),
+		Value: value,
 	}, nil
 }
 
@@ -69,8 +69,8 @@ func (c *SyscallService) DeleteObject(ctx context.Context, in *pb.DeleteRequest)
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	nctx.Cache.Delete(compk)
-	return &pb.DeleteResponse{}, nil
+	err := nctx.Cache.Delete([]byte(compk))
+	return &pb.DeleteResponse{}, err
 }
 
 // GetCallArgs implements Syscall interface
