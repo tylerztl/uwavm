@@ -1,12 +1,11 @@
 package log
 
 import (
-	"go/build"
 	"os"
 	"path"
-	"path/filepath"
 	"sync"
 
+	"github.com/BeDreamCoder/uwavm/common/util"
 	log "github.com/inconshreveable/log15"
 )
 
@@ -17,18 +16,9 @@ var (
 )
 
 func init() {
-	filePath = path.Join(goPath(), "src/github.com/BeDreamCoder/uwavm")
+	filePath = path.Join(util.GoPath(), "src/github.com/BeDreamCoder/uwavm/output/log")
 	errorFile = path.Join(filePath, "error.json")
-	if err := os.MkdirAll(filePath, os.ModePerm); err != nil {
-		panic(err)
-	}
-}
-
-func goPath() string {
-	gpDefault := build.Default.GOPATH
-	gps := filepath.SplitList(gpDefault)
-
-	return gps[0]
+	util.CreateDirIfMissing(filePath)
 }
 
 func New(ctx ...interface{}) log.Logger {

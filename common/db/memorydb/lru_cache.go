@@ -18,7 +18,7 @@
  * count := cache.Len()
  */
 
-package db
+package memorydb
 
 import (
 	"container/list"

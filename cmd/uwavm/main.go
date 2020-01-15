@@ -59,7 +59,11 @@ func run(modulePath string, args []string) error {
 	}
 
 	ctxmgr := bridge.NewContextManager()
-	ctxmgr.MakeContext()
+	cctx := ctxmgr.MakeContext()
+	cctx.Method = "invoke"
+	cctx.Args = map[string][]byte{"action": []byte("transfer"),
+		"to":     []byte("bob"),
+		"amount": []byte("1")}
 	resolver := exec.NewMultiResolver(gowasm.NewResolver(), syscall.NewSyscallResolver(bridge.NewSyscallService(ctxmgr)))
 	var code exec.Code
 	codebuf, err := ioutil.ReadFile(modulePath)
