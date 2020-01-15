@@ -9,10 +9,12 @@ import (
 	log "github.com/inconshreveable/log15"
 )
 
+type Logger log.Logger
+
 var (
 	filePath, errorFile string
 	logOnce             sync.Once
-	singleton           log.Logger
+	singleton           Logger
 )
 
 func init() {
@@ -21,7 +23,7 @@ func init() {
 	util.CreateDirIfMissing(filePath)
 }
 
-func New(ctx ...interface{}) log.Logger {
+func New(ctx ...interface{}) Logger {
 	uLog := log.New(ctx)
 	uLog.SetHandler(log.SyncHandler(log.MultiHandler(
 		log.StreamHandler(os.Stderr, log.LogfmtFormat()),
@@ -31,7 +33,7 @@ func New(ctx ...interface{}) log.Logger {
 	return uLog
 }
 
-func GetLogger() log.Logger {
+func GetLogger() Logger {
 	logOnce.Do(func() {
 		singleton = New("uwasm")
 	})

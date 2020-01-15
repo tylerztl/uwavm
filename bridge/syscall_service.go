@@ -38,7 +38,7 @@ func (c *SyscallService) PutObject(ctx context.Context, in *pb.PutRequest) (*pb.
 		return nil, errors.New("put nil value")
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	ok = nctx.Cache.Add(compk, in.Value)
+	ok = nctx.Cache.Put(compk, in.Value)
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("Failed to PutObject for key:[%s],value:[%s]", compk, string(in.Value)))
 	}
@@ -69,7 +69,7 @@ func (c *SyscallService) DeleteObject(ctx context.Context, in *pb.DeleteRequest)
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	nctx.Cache.Del(compk)
+	nctx.Cache.Delete(compk)
 	return &pb.DeleteResponse{}, nil
 }
 

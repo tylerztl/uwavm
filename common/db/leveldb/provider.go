@@ -54,13 +54,13 @@ func (h *DBHandle) Get(key []byte) ([]byte, error) {
 }
 
 // Put saves the key/value
-func (h *DBHandle) Put(key []byte, value []byte, sync bool) error {
-	return h.db.Put(constructLevelKey(h.dbName, key), value, sync)
+func (h *DBHandle) Put(key []byte, value []byte) error {
+	return h.db.Put(constructLevelKey(h.dbName, key), value)
 }
 
 // Delete deletes the given key
-func (h *DBHandle) Delete(key []byte, sync bool) error {
-	return h.db.Delete(constructLevelKey(h.dbName, key), sync)
+func (h *DBHandle) Delete(key []byte) error {
+	return h.db.Delete(constructLevelKey(h.dbName, key))
 }
 
 // WriteBatch writes a batch in an atomic way

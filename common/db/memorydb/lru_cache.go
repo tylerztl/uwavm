@@ -24,7 +24,12 @@ import (
 	"container/list"
 	"fmt"
 	"sync"
+
+	"github.com/BeDreamCoder/uwavm/common/log"
+	"github.com/pkg/errors"
 )
+
+var logger = log.New("uwavm", "leveldb")
 
 // LRUCache cache struct
 type LRUCache struct {
@@ -55,14 +60,15 @@ func NewLRUCache(capacity int) *LRUCache {
 // Return:
 //     - value: cache value
 //     - ok   : true if found, false if not
-func (c *LRUCache) Get(key interface{}) (interface{}, bool) {
+func (c *LRUCache) Get(key interface{}) (interface{}, error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if elem, ok := c.cache[key]; ok {
 		c.lru.MoveToFront(elem) // move node to head of lru list
-		return elem.Value.(*Pair).value, true
+		return elem.Value.(*Pair).value, nil
 	}
-	return nil, false
+	logger.Error("Error retrieving memorydb key", key)
+	return nil, errors.Errorf("Error retrieving memorydb key: %v", key)
 }
 
 // Add add a key-value pair to LRU cache
@@ -71,14 +77,14 @@ func (c *LRUCache) Get(key interface{}) (interface{}, bool) {
 //     - value: cache value
 // Return:
 //     - evictOrNot: true if eviction occurs, false if not
-func (c *LRUCache) Add(key interface{}, value interface{}) bool {
+func (c *LRUCache) Put(key interface{}, value interface{}) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	// update item if found in cache
 	if elem, ok := c.cache[key]; ok {
 		c.lru.MoveToFront(elem) // update lru list
 		elem.Value.(*Pair).value = value
-		return false
+		return nil
 	}
 	// add item if not found
 	elem := c.lru.PushFront(&Pair{key, value})
@@ -86,9 +92,10 @@ func (c *LRUCache) Add(key interface{}, value interface{}) bool {
 	// evict item if needed
 	if c.lru.Len() > c.capacity {
 		c.evict()
-		return true
+		return nil
 	}
-	return false
+	logger.Error("Error writing memorydb key", key)
+	return errors.Errorf("Error writing memorydb key: %v", key)
 }
 
 // evict a key-value pair from LRU cache
@@ -105,13 +112,17 @@ func (c *LRUCache) evict() {
 // Del delete cached value from cache
 // Params:
 //     - key: cache key
-func (c *LRUCache) Del(key interface{}) {
+func (c *LRUCache) Delete(key interface{}) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	if elem, ok := c.cache[key]; ok {
 		c.lru.Remove(elem)
 		delete(c.cache, key)
+	} else {
+		logger.Error("Error deleting memorydb key", key)
+		return errors.Errorf("error deleting leveldb key [%#v]", key)
 	}
+	return nil
 }
 
 // Len get number of items in cache

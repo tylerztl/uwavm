@@ -106,12 +106,8 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 }
 
 // Put saves the key/value
-func (db *DB) Put(key []byte, value []byte, sync bool) error {
-	wo := db.writeOptsNoSync
-	if sync {
-		wo = db.writeOptsSync
-	}
-	err := db.db.Put(key, value, wo)
+func (db *DB) Put(key []byte, value []byte) error {
+	err := db.db.Put(key, value, db.writeOptsSync)
 	if err != nil {
 		logger.Error("Error writing leveldb key", key)
 		return errors.Wrapf(err, "error writing leveldb key [%#v]", key)
@@ -120,12 +116,8 @@ func (db *DB) Put(key []byte, value []byte, sync bool) error {
 }
 
 // Delete deletes the given key
-func (db *DB) Delete(key []byte, sync bool) error {
-	wo := db.writeOptsNoSync
-	if sync {
-		wo = db.writeOptsSync
-	}
-	err := db.db.Delete(key, wo)
+func (db *DB) Delete(key []byte) error {
+	err := db.db.Delete(key, db.writeOptsSync)
 	if err != nil {
 		logger.Error("Error deleting leveldb key", key)
 		return errors.Wrapf(err, "error deleting leveldb key [%#v]", key)
