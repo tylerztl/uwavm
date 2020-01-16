@@ -11,6 +11,7 @@ import (
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/db/leveldb"
 	"github.com/BeDreamCoder/uwavm/vm"
+	_ "github.com/BeDreamCoder/uwavm/vm/interpreter"
 )
 
 var (
