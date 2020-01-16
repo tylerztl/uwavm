@@ -1,4 +1,4 @@
-package memrpc
+package bridge
 
 import (
 	"context"
@@ -45,7 +45,7 @@ func parseMethods(syscall interface{}) map[string]*reflect.Method {
 	for i := 0; i < v.NumMethod(); i++ {
 		method := v.Method(i)
 		tp := method.Type
-		// Method(*bridge.SyscallService, context.Context, Request) (Response, error)
+		// Method(*bridge.SyscallService, context.ContractState, Request) (Response, error)
 		if tp.NumIn() != 3 || tp.NumOut() != 2 {
 			continue
 		}

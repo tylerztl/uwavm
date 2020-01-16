@@ -1,11 +1,10 @@
-package syscall
+package vm
 
 import (
 	"context"
 	"encoding/binary"
 	"fmt"
 	"github.com/BeDreamCoder/uwavm/bridge"
-	"github.com/BeDreamCoder/uwavm/bridge/memrpc"
 	"github.com/BeDreamCoder/uwavm/common/log"
 	"github.com/BeDreamCoder/uwavm/exec"
 )
@@ -21,12 +20,12 @@ type responseDesc struct {
 }
 
 type syscallResolver struct {
-	rpcserver *memrpc.Server
+	rpcserver *bridge.Server
 }
 
-func NewSyscallResolver(syscall *bridge.SyscallService) exec.Resolver {
+func newSyscallResolver(syscall *bridge.SyscallService) exec.Resolver {
 	return &syscallResolver{
-		rpcserver: memrpc.NewServer(syscall),
+		rpcserver: bridge.NewServer(syscall),
 	}
 }
 

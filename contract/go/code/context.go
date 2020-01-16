@@ -4,7 +4,7 @@ import (
 	"math/big"
 )
 
-// Context is the context in which the contract runs
+// GetContractState is the context in which the contract runs
 type Context interface {
 	Args() map[string][]byte
 	Caller() string

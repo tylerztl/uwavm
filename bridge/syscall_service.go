@@ -8,18 +8,21 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
 )
 
 // SyscallService is the handler of contract syscalls
 type SyscallService struct {
-	ctxmgr *ContextManager
+	ctxmgr *StateManager
+	db     db.Database
 }
 
 // NewSyscallService instances a new SyscallService
-func NewSyscallService(ctxmgr *ContextManager) *SyscallService {
+func NewSyscallService(ctxmgr *StateManager, db db.Database) *SyscallService {
 	return &SyscallService{
 		ctxmgr: ctxmgr,
+		db:     db,
 	}
 }
 
@@ -30,7 +33,7 @@ func (c *SyscallService) Transfer(ctx context.Context, in *pb.TransferRequest) (
 
 // PutObject implements Syscall interface
 func (c *SyscallService) PutObject(ctx context.Context, in *pb.PutRequest) (*pb.PutResponse, error) {
-	nctx, ok := c.ctxmgr.Context(in.GetHeader().Ctxid)
+	nctx, ok := c.ctxmgr.GetContractState(in.GetHeader().Ctxid)
 	if !ok {
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
@@ -38,7 +41,7 @@ func (c *SyscallService) PutObject(ctx context.Context, in *pb.PutRequest) (*pb.
 		return nil, errors.New("put nil value")
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	err := nctx.Cache.Put([]byte(compk), in.Value)
+	err := c.db.Put([]byte(compk), in.Value)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Failed to PutObject for key:[%s],value:[%s]", compk, string(in.Value)))
 	}
@@ -48,12 +51,12 @@ func (c *SyscallService) PutObject(ctx context.Context, in *pb.PutRequest) (*pb.
 
 // GetObject implements Syscall interface
 func (c *SyscallService) GetObject(ctx context.Context, in *pb.GetRequest) (*pb.GetResponse, error) {
-	nctx, ok := c.ctxmgr.Context(in.GetHeader().Ctxid)
+	nctx, ok := c.ctxmgr.GetContractState(in.GetHeader().Ctxid)
 	if !ok {
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	value, err := nctx.Cache.Get([]byte(compk))
+	value, err := c.db.Get([]byte(compk))
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Cant GetObject for key: [%s]", compk))
 	}
@@ -64,18 +67,18 @@ func (c *SyscallService) GetObject(ctx context.Context, in *pb.GetRequest) (*pb.
 
 // DeleteObject implements Syscall interface
 func (c *SyscallService) DeleteObject(ctx context.Context, in *pb.DeleteRequest) (*pb.DeleteResponse, error) {
-	nctx, ok := c.ctxmgr.Context(in.GetHeader().Ctxid)
+	nctx, ok := c.ctxmgr.GetContractState(in.GetHeader().Ctxid)
 	if !ok {
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
 	compk := fmt.Sprintf("%s-%s", nctx.ContractName, string(in.Key))
-	err := nctx.Cache.Delete([]byte(compk))
+	err := c.db.Delete([]byte(compk))
 	return &pb.DeleteResponse{}, err
 }
 
 // GetCallArgs implements Syscall interface
 func (c *SyscallService) GetCallArgs(ctx context.Context, in *pb.GetCallArgsRequest) (*pb.CallArgs, error) {
-	nctx, ok := c.ctxmgr.Context(in.GetHeader().Ctxid)
+	nctx, ok := c.ctxmgr.GetContractState(in.GetHeader().Ctxid)
 	if !ok {
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}
@@ -90,17 +93,15 @@ func (c *SyscallService) GetCallArgs(ctx context.Context, in *pb.GetCallArgsRequ
 		return args[i].Key < args[j].Key
 	})
 	return &pb.CallArgs{
-		Method:         nctx.Method,
-		Args:           args,
-		Initiator:      nctx.Initiator,
-		AuthRequire:    nctx.AuthRequire,
-		TransferAmount: nctx.TransferAmount,
+		Method:    nctx.Method,
+		Args:      args,
+		Initiator: nctx.Initiator,
 	}, nil
 }
 
 // SetOutput implements Syscall interface
 func (c *SyscallService) SetOutput(ctx context.Context, in *pb.SetOutputRequest) (*pb.SetOutputResponse, error) {
-	nctx, ok := c.ctxmgr.Context(in.Header.Ctxid)
+	nctx, ok := c.ctxmgr.GetContractState(in.Header.Ctxid)
 	if !ok {
 		return nil, fmt.Errorf("bad ctx id:%d", in.Header.Ctxid)
 	}

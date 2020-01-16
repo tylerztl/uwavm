@@ -49,3 +49,11 @@ func GoPath() string {
 
 	return gps[0]
 }
+
+func ContractCodeKey(contractName string) []byte {
+	return []byte("contract-" + contractName)
+}
+
+func ContractCodeDescKey(contractName string) []byte {
+	return []byte("contractdesc-" + contractName)
+}

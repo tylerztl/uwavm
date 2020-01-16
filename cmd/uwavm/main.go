@@ -3,17 +3,16 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"path/filepath"
 
 	"github.com/BeDreamCoder/uwavm/bridge"
-	"github.com/BeDreamCoder/uwavm/bridge/syscall"
-	"github.com/BeDreamCoder/uwavm/exec"
-	gowasm "github.com/BeDreamCoder/uwavm/runtime/go"
+	"github.com/BeDreamCoder/uwavm/common/db/leveldb"
+	"github.com/BeDreamCoder/uwavm/wasm"
 )
 
 var (
@@ -52,53 +51,44 @@ func prepareArgs(mem []byte, args []string, envs []string) (int, int) {
 	return argc, argv
 }
 
-func run(modulePath string, args []string) error {
+func makeDeployArgs(modulePath string) map[string][]byte {
+	codebuf, err := ioutil.ReadFile(modulePath)
+	if err != nil {
+		panic(err)
+	}
+
+	args := map[string][]byte{
+		"initSupply": []byte("1000000"),
+	}
+	argsbuf, _ := json.Marshal(args)
+	return map[string][]byte{
+		"contract_name": []byte("erc20"),
+		"contract_code": codebuf,
+		"language":      []byte("go"),
+		"init_args":     argsbuf,
+	}
+}
+
+func run(modulePath string) error {
 	_, err := filepath.Abs(modulePath)
 	if err != nil {
 		return err
 	}
 
-	ctxmgr := bridge.NewContextManager()
-	cctx := ctxmgr.MakeContext()
-	cctx.Method = "invoke"
-	cctx.Args = map[string][]byte{"action": []byte("transfer"),
-		"to":     []byte("bob"),
-		"amount": []byte("1")}
-	resolver := exec.NewMultiResolver(gowasm.NewResolver(), syscall.NewSyscallResolver(bridge.NewSyscallService(ctxmgr)))
-	var code exec.Code
-	codebuf, err := ioutil.ReadFile(modulePath)
-	if err != nil {
-		return err
-	}
-	code, err = exec.NewInterpCode(codebuf, resolver)
-	if err != nil {
-		return err
-	}
+	db := leveldb.NewProvider().GetDBHandle("uwasm")
+	bridge := bridge.NewBridge(db)
+	vm := wasm.NewVMManager(db, bridge)
+	bridge.RegisterExecutor("uwasm", vm)
+	resp, err := vm.DeployContract(makeDeployArgs(modulePath))
 
-	defer code.Release()
-	ctx, err := code.NewContext(exec.DefaultContextConfig())
-	if err != nil {
-		return err
-	}
+	fmt.Println("Status:", resp.GetStatus())
+	fmt.Println("Message:", resp.GetMessage())
+	fmt.Println("Bdoy:", resp.GetBody())
 
-	defer ctx.Release()
-	exec.SetWriter(ctx, os.Stderr)
-	var entry string
-	switch *environ {
-	case "go":
-		entry = "run"
-		gowasm.RegisterRuntime(ctx)
-	}
-
-	ctx.SetUserData(bridge.ContextIDKey, int64(1))
-
-	var argc, argv int
-	if ctx.Memory() != nil {
-		argc, argv = prepareArgs(ctx.Memory(), args, nil)
-	}
-	ret, err := ctx.Exec(entry, []int64{int64(argc), int64(argv)})
-	fmt.Println("gas: ", ctx.GasUsed())
-	fmt.Println("ret: ", ret)
+	//cctx.Method = "invoke"
+	//cctx.Args = map[string][]byte{"action": []byte("transfer"),
+	//	"to":     []byte("bob"),
+	//	"amount": []byte("1")}
 	return err
 }
 
@@ -116,7 +106,7 @@ func main() {
 		log.Fatalf("bad file ext:%s", ext)
 	}
 
-	err = run(target, flag.Args()[0:])
+	err = run(target)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,7 +8,7 @@ const (
 	debugWriterKey = "debugWriter"
 )
 
-// SetWriter set debug writer to Context
+// SetWriter set debug writer to GetContractState
 func SetWriter(ctx Context, w io.Writer) {
 	ctx.SetUserData(debugWriterKey, w)
 }

@@ -238,7 +238,7 @@ func (c *wagonContext) Release() {
 	c.vm.Close()
 }
 
-// SetUserData store key-value pair to Context which can be retrieved by GetUserData
+// SetUserData store key-value pair to GetContractState which can be retrieved by GetUserData
 func (c *wagonContext) SetUserData(key string, value interface{}) {
 	c.userData[key] = value
 }
