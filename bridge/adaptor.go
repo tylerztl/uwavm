@@ -67,7 +67,7 @@ func (v *vmImpl) NewContext(state *ContractState) (Contract, error) {
 	ctx := v.ctxmgr.CreateContractState()
 	ctx.ContractName = state.ContractName
 	ctx.Language = state.Language
-	ctx.Initiator = state.Initiator
+	ctx.Caller = state.Caller
 
 	release := func() {
 		v.ctxmgr.DestroyContractState(ctx)

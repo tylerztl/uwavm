@@ -75,7 +75,7 @@ func (x *xmap) Get(mkey string) *big.Int {
 	}
 	value, err := x.db.ctx.GetObject([]byte(key))
 	n = big.NewInt(0)
-	if err == nil {
+	if err == nil && value != nil {
 		_, ok := n.SetString(string(value), 10)
 		if !ok {
 			panic(string(value))

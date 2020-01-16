@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/binary"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -20,37 +18,6 @@ var (
 	environ = flag.String("e", "go", "environ, c or go")
 )
 
-func prepareArgs(mem []byte, args []string, envs []string) (int, int) {
-	argc := len(args)
-	offset := 4 << 10
-	strdup := func(s string) int {
-		copy(mem[offset:], s+"\x00")
-		ptr := offset
-		offset += len(s) + (8 - len(s)%8)
-		return ptr
-	}
-	var argvAddr []int
-	for _, arg := range args {
-		argvAddr = append(argvAddr, strdup(arg))
-	}
-
-	argvAddr = append(argvAddr, len(envs))
-	for _, env := range envs {
-		argvAddr = append(argvAddr, strdup(env))
-	}
-
-	argv := offset
-	buf := bytes.NewBuffer(mem[offset:offset])
-	for _, addr := range argvAddr {
-		if *environ == "go" {
-			binary.Write(buf, binary.LittleEndian, uint64(addr))
-		} else {
-			binary.Write(buf, binary.LittleEndian, uint32(addr))
-		}
-	}
-	return argc, argv
-}
-
 func makeDeployArgs(modulePath string) map[string][]byte {
 	codebuf, err := ioutil.ReadFile(modulePath)
 	if err != nil {
@@ -66,6 +33,7 @@ func makeDeployArgs(modulePath string) map[string][]byte {
 		"contract_code": codebuf,
 		"language":      []byte("go"),
 		"init_args":     argsbuf,
+		"caller":        []byte("alice"),
 	}
 }
 
@@ -84,11 +52,6 @@ func run(modulePath string) error {
 	fmt.Println("Status:", resp.GetStatus())
 	fmt.Println("Message:", resp.GetMessage())
 	fmt.Println("Bdoy:", resp.GetBody())
-
-	//cctx.Method = "invoke"
-	//cctx.Args = map[string][]byte{"action": []byte("transfer"),
-	//	"to":     []byte("bob"),
-	//	"amount": []byte("1")}
 	return err
 }
 

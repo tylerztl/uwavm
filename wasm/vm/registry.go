@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/db"
 )

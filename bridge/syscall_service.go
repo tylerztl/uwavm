@@ -95,7 +95,7 @@ func (c *SyscallService) GetCallArgs(ctx context.Context, in *pb.GetCallArgsRequ
 	return &pb.CallArgs{
 		Method:    nctx.Method,
 		Args:      args,
-		Initiator: nctx.Initiator,
+		Caller: nctx.Caller,
 	}, nil
 }
 

@@ -3,6 +3,7 @@ package wasm
 import (
 	"encoding/json"
 	"errors"
+
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/common/util"
@@ -84,6 +85,11 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 		return nil, err
 	}
 
+	caller := args["caller"]
+	if caller == nil {
+		return nil, errors.New("missing contract caller")
+	}
+
 	if err = v.db.Put(util.ContractCodeKey(contractName), code); err != nil {
 		return nil, err
 	}
@@ -94,7 +100,7 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 	state := &bridge.ContractState{
 		ContractName: contractName,
 		Language:     string(language),
-		Initiator:    "",
+		Caller:       string(caller),
 	}
 
 	out, err := v.initContract(state, initArgs)

@@ -19,7 +19,7 @@ type ContractState struct {
 
 	Language string
 
-	Initiator string
+	Caller string
 
 	Output *pb.Response
 }

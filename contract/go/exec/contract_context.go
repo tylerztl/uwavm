@@ -2,7 +2,6 @@ package exec
 
 import (
 	"log"
-	"math/big"
 
 	"github.com/BeDreamCoder/uwavm/contract/go/code"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
@@ -14,12 +13,7 @@ const (
 	methodDelete       = "DeleteObject"
 	methodOutput       = "SetOutput"
 	methodGetCallArgs  = "GetCallArgs"
-	methodTransfer     = "Transfer"
 	methodContractCall = "ContractCall"
-)
-
-var (
-	_ code.Context = (*contractContext)(nil)
 )
 
 type contractContext struct {
@@ -61,15 +55,7 @@ func (c *contractContext) Args() map[string][]byte {
 }
 
 func (c *contractContext) Caller() string {
-	return ""
-}
-
-func (c *contractContext) Initiator() string {
-	return c.callArgs.Initiator
-}
-
-func (c *contractContext) AuthRequire() []string {
-	return c.callArgs.AuthRequire
+	return c.callArgs.Caller
 }
 
 func (c *contractContext) PutObject(key, value []byte) error {
@@ -102,16 +88,6 @@ func (c *contractContext) DeleteObject(key []byte) error {
 	}
 	rep := new(pb.DeleteResponse)
 	return c.bridgeCallFunc(methodDelete, req, rep)
-}
-
-func (c *contractContext) Transfer(to string, amount *big.Int) error {
-	req := &pb.TransferRequest{
-		Header: &c.header,
-		To:     to,
-		Amount: amount.Text(10),
-	}
-	rep := new(pb.TransferResponse)
-	return c.bridgeCallFunc(methodTransfer, req, rep)
 }
 
 func (c *contractContext) Call(module, contract, method string, args map[string][]byte) (*code.Response, error) {
