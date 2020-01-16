@@ -32,7 +32,21 @@ func makeDeployArgs(modulePath string) map[string][]byte {
 		"contract_name": []byte("erc20"),
 		"contract_code": codebuf,
 		"language":      []byte("go"),
-		"init_args":     argsbuf,
+		"args":          argsbuf,
+		"caller":        []byte("alice"),
+	}
+}
+
+func makeInvokeArgs() map[string][]byte {
+	args := map[string][]byte{
+		"action":  []byte("balanceOf"),
+		"address": []byte("alice"),
+	}
+	argsbuf, _ := json.Marshal(args)
+	return map[string][]byte{
+		"contract_name": []byte("erc20"),
+		"language":      []byte("go"),
+		"args":          argsbuf,
 		"caller":        []byte("alice"),
 	}
 }
@@ -48,10 +62,10 @@ func run(modulePath string) error {
 	vm := wasm.NewVMManager(db, bridge)
 	bridge.RegisterExecutor("wasm", vm)
 	resp, err := vm.DeployContract(makeDeployArgs(modulePath))
-
+	//resp, err := vm.InvokeContract("query", makeInvokeArgs())
 	fmt.Println("Status:", resp.GetStatus())
 	fmt.Println("Message:", resp.GetMessage())
-	fmt.Println("Bdoy:", resp.GetBody())
+	fmt.Println("Bdoy:", string(resp.GetBody()))
 	return err
 }
 

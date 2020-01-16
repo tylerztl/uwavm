@@ -76,7 +76,7 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 		return nil, errors.New("missing contract language")
 	}
 
-	initArgsBuf := args["init_args"]
+	initArgsBuf := args["args"]
 	if initArgsBuf == nil {
 		return nil, errors.New("missing args field in args")
 	}
@@ -103,7 +103,7 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 		Caller:       string(caller),
 	}
 
-	out, err := v.initContract(state, initArgs)
+	out, err := v.invokeContract(state, bridge.InitMethod, initArgs)
 	if err != nil {
 		if _, ok := err.(*bridge.ContractError); !ok {
 			v.vmimpl.RemoveCache(contractName)
@@ -114,7 +114,54 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 	return out, nil
 }
 
-func (v *VMManager) initContract(state *bridge.ContractState, args map[string][]byte) (*pb.Response, error) {
+func (v *VMManager) InvokeContract(method string, args map[string][]byte) (*pb.Response, error) {
+	name := args["contract_name"]
+	if name == nil {
+		return nil, errors.New("bad contract name")
+	}
+	contractName := string(name)
+	err := v.verifyContractName(contractName)
+	if err != nil {
+		return nil, err
+	}
+
+	caller := args["caller"]
+	if caller == nil {
+		return nil, errors.New("missing contract caller")
+	}
+
+	language := args["language"]
+	if language == nil {
+		return nil, errors.New("missing contract language")
+	}
+
+	argsBuf := args["args"]
+	if argsBuf == nil {
+		return nil, errors.New("missing args field in args")
+	}
+	var invokeArgs map[string][]byte
+	if err = json.Unmarshal(argsBuf, &invokeArgs); err != nil {
+		return nil, err
+	}
+
+	state := &bridge.ContractState{
+		ContractName: contractName,
+		Language:     string(language),
+		Caller:       string(caller),
+	}
+
+	out, err := v.invokeContract(state, method, invokeArgs)
+	if err != nil {
+		if _, ok := err.(*bridge.ContractError); !ok {
+			v.vmimpl.RemoveCache(contractName)
+		}
+		log.Error("call contract initialize method error", "error", err, "contract", contractName)
+		return nil, err
+	}
+	return out, nil
+}
+
+func (v *VMManager) invokeContract(state *bridge.ContractState, method string, args map[string][]byte) (*pb.Response, error) {
 	vm, ok := v.bridge.GetVirtualMachine("wasm")
 	if !ok {
 		return nil, errors.New("wasm vm not registered")
@@ -124,7 +171,7 @@ func (v *VMManager) initContract(state *bridge.ContractState, args map[string][]
 	if err != nil {
 		return nil, err
 	}
-	out, err := ctx.Invoke(bridge.InitMethod, args)
+	out, err := ctx.Invoke(method, args)
 	if err != nil {
 		return nil, err
 	}
