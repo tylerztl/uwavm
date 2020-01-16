@@ -1,31 +1,33 @@
-package vm
+package interpreter
 
 import (
 	"errors"
 	"fmt"
+
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/common/util"
-	"github.com/BeDreamCoder/uwavm/exec"
-	gowasm "github.com/BeDreamCoder/uwavm/runtime/go"
+	"github.com/BeDreamCoder/uwavm/vm"
+	"github.com/BeDreamCoder/uwavm/wasm/exec"
+	gowasm "github.com/BeDreamCoder/uwavm/wasm/runtime/go"
 )
 
 type interpCreator struct {
-	cm             *codeManager
+	chd            vm.CodeHandle
 	db             db.Database
 	syscallService *bridge.SyscallService
 }
 
-func newInterpCreator(syscallService *bridge.SyscallService, db db.Database) (InstanceCreator, error) {
+func newInterpCreator(syscallService *bridge.SyscallService, db db.Database) (vm.InstanceCreator, error) {
 	creator := &interpCreator{
 		syscallService: syscallService,
 		db:             db,
 	}
-	creator.cm = newCodeManager(creator.makeExecCode)
+	creator.chd = vm.NewCodeManager(creator.makeExecCode)
 	return creator, nil
 }
 
-func (x *interpCreator) makeExecCode(contractName string) (exec.Code, error) {
+func (x *interpCreator) makeExecCode(contractName string) (exec.WasmExec, error) {
 	codebuf, err := x.GetContractCode(contractName)
 	if err != nil {
 		return nil, err
@@ -36,8 +38,8 @@ func (x *interpCreator) makeExecCode(contractName string) (exec.Code, error) {
 	return exec.NewInterpCode(codebuf, resolver)
 }
 
-func (x *interpCreator) CreateInstance(ctx *bridge.ContractState) (Instance, error) {
-	code, err := x.cm.GetExecCode(ctx.ContractName)
+func (x *interpCreator) CreateInstance(ctx *bridge.ContractState) (bridge.Instance, error) {
+	code, err := x.chd.GetExecCode(ctx.ContractName)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +47,7 @@ func (x *interpCreator) CreateInstance(ctx *bridge.ContractState) (Instance, err
 }
 
 func (x *interpCreator) RemoveCache(contractName string) {
-	x.cm.RemoveCode(contractName)
+	x.chd.RemoveCode(contractName)
 }
 
 func (x *interpCreator) GetContractCode(name string) ([]byte, error) {
@@ -60,5 +62,5 @@ func (x *interpCreator) GetContractCode(name string) ([]byte, error) {
 }
 
 func init() {
-	Register("uwavm", newInterpCreator)
+	vm.Register("uwavm", newInterpCreator)
 }

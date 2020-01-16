@@ -1,18 +1,17 @@
-package wasm
+package vm
 
 import (
 	"errors"
 
 	"github.com/BeDreamCoder/uwavm/bridge"
-	"github.com/BeDreamCoder/uwavm/wasm/vm"
 )
 
-type bridgeInstance struct {
+type vmHandle struct {
 	ctx        *bridge.ContractState
-	vmInstance vm.Instance
+	vmInstance bridge.Instance
 }
 
-func (v *bridgeInstance) guessEntry() (string, error) {
+func (v *vmHandle) guessEntry() (string, error) {
 	switch v.ctx.Language {
 	case "go":
 		return "run", nil
@@ -23,11 +22,11 @@ func (v *bridgeInstance) guessEntry() (string, error) {
 	}
 }
 
-func (v *bridgeInstance) getEntry() (string, error) {
+func (v *vmHandle) getEntry() (string, error) {
 	return v.guessEntry()
 }
 
-func (v *bridgeInstance) Exec() error {
+func (v *vmHandle) Exec(function string) error {
 	entry, err := v.getEntry()
 	if err != nil {
 		return err
@@ -35,10 +34,10 @@ func (v *bridgeInstance) Exec() error {
 	return v.vmInstance.Exec(entry)
 }
 
-func (v *bridgeInstance) Release() {
+func (v *vmHandle) Release() {
 	v.vmInstance.Release()
 }
 
-func (v *bridgeInstance) Abort(msg string) {
+func (v *vmHandle) Abort(msg string) {
 	v.vmInstance.Abort(msg)
 }

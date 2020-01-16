@@ -3,9 +3,9 @@ package gowasm
 import (
 	"time"
 
-	"github.com/BeDreamCoder/uwavm/exec"
-	"github.com/BeDreamCoder/uwavm/runtime/go/js"
-	"github.com/BeDreamCoder/uwavm/runtime/go/js/fs"
+	"github.com/BeDreamCoder/uwavm/wasm/exec"
+	"github.com/BeDreamCoder/uwavm/wasm/runtime/go/js"
+	"github.com/BeDreamCoder/uwavm/wasm/runtime/go/js/fs"
 )
 
 const (

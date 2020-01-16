@@ -1,4 +1,4 @@
-package vm
+package interpreter
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/log"
-	"github.com/BeDreamCoder/uwavm/exec"
+	"github.com/BeDreamCoder/uwavm/wasm/exec"
 )
 
 const (
@@ -21,12 +21,12 @@ type responseDesc struct {
 }
 
 type syscallResolver struct {
-	rpcserver *bridge.Server
+	rpcserver *Server
 }
 
 func newSyscallResolver(syscall *bridge.SyscallService) exec.Resolver {
 	return &syscallResolver{
-		rpcserver: bridge.NewServer(syscall),
+		rpcserver: NewServer(syscall),
 	}
 }
 

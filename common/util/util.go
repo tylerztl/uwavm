@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+const (
+	InitContractMethod   = "initialize"
+	InvokeContractMethod = "invoke"
+	QueryContractMethod  = "query"
+)
+
 // CreateDirIfMissing creates a dir for dirPath if not already exists. If the dir is empty it returns true
 func CreateDirIfMissing(dirPath string) (bool, error) {
 	// if dirPath does not end with a path separator, it leaves out the last segment while creating directories

@@ -1,4 +1,4 @@
-package wasm
+package vm
 
 import (
 	"encoding/json"
@@ -8,15 +8,13 @@ import (
 	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/common/util"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
-	"github.com/BeDreamCoder/uwavm/wasm/vm"
-	_ "github.com/BeDreamCoder/uwavm/wasm/vm"
 	log "github.com/inconshreveable/log15"
 )
 
 // VMManager manages wasm contracts, include deploy contracts, instance wasm virtual machine, etc...
 type VMManager struct {
 	db     db.Database
-	vmimpl vm.InstanceCreator
+	vmimpl InstanceCreator
 	bridge *bridge.Bridge
 }
 
@@ -30,7 +28,7 @@ func NewVMManager(db db.Database, bridge *bridge.Bridge) *VMManager {
 
 // RegisterSyscallService implements bridge.Executor
 func (v *VMManager) RegisterSyscallService(syscall *bridge.SyscallService) {
-	vmimpl, err := vm.Open("uwavm", syscall, v.db)
+	vmimpl, err := Open("uwavm", syscall, v.db)
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +41,7 @@ func (v *VMManager) NewCreatorInstance(ctx *bridge.ContractState) (bridge.Instan
 	if err != nil {
 		return nil, err
 	}
-	return &bridgeInstance{
+	return &vmHandle{
 		ctx:        ctx,
 		vmInstance: ins,
 	}, nil
@@ -103,7 +101,7 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 		Caller:       string(caller),
 	}
 
-	out, err := v.invokeContract(state, bridge.InitMethod, initArgs)
+	out, err := v.invokeContract(state, util.InitContractMethod, initArgs)
 	if err != nil {
 		if _, ok := err.(*bridge.ContractError); !ok {
 			v.vmimpl.RemoveCache(contractName)
@@ -167,7 +165,7 @@ func (v *VMManager) invokeContract(state *bridge.ContractState, method string, a
 		return nil, errors.New("wasm vm not registered")
 	}
 
-	ctx, err := vm.NewContext(state)
+	ctx, err := vm.NewVM(state)
 	if err != nil {
 		return nil, err
 	}

@@ -135,12 +135,12 @@ func makeWagonModule(resolver Resolver) wasm.ResolveModuleFunc {
 	}
 }
 
-// InterpCode is the Code interface of interpreter mode
+// InterpCode is the WasmExec interface of interpreter mode
 type InterpCode struct {
 	module *wasm.Module
 }
 
-// NewInterpCode instance a Code based on the wasm code and resolver
+// NewInterpCode instance a WasmExec based on the wasm code and resolver
 func NewInterpCode(wasmCode []byte, resolver Resolver) (code *InterpCode, err error) {
 	defer CaptureTrap(&err)
 	importModuleFunc := makeWagonModule(resolver)
@@ -154,7 +154,7 @@ func NewInterpCode(wasmCode []byte, resolver Resolver) (code *InterpCode, err er
 	return
 }
 
-// NewContext instances a new context
+// NewVM instances a new context
 func (code *InterpCode) NewContext(cfg *ContextConfig) (ictx Context, err error) {
 	defer CaptureTrap(&err)
 	vm, err := exec.NewVM(code.module,
@@ -175,7 +175,7 @@ func (code *InterpCode) NewContext(cfg *ContextConfig) (ictx Context, err error)
 	return
 }
 
-// Release releases the resources
+// ReleaseCache releases the resources
 func (code *InterpCode) Release() {
 }
 

@@ -41,7 +41,7 @@ type Context interface {
 	Release()
 }
 
-type Code interface {
+type WasmExec interface {
 	NewContext(cfg *ContextConfig) (ictx Context, err error)
 	Release()
 }

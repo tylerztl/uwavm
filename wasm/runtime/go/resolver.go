@@ -3,7 +3,7 @@ package gowasm
 import (
 	"reflect"
 
-	"github.com/BeDreamCoder/uwavm/exec"
+	"github.com/BeDreamCoder/uwavm/wasm/exec"
 )
 
 type resolver struct {

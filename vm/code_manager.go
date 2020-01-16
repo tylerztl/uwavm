@@ -4,30 +4,30 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/BeDreamCoder/uwavm/exec"
+	"github.com/BeDreamCoder/uwavm/wasm/exec"
 )
 
-type makeExecCodeFunc func(contractName string) (exec.Code, error)
+type makeExecCodeFunc func(contractName string) (exec.WasmExec, error)
 
-type contractCode struct {
+type ContractCode struct {
 	ContractName string
-	ExecCode     exec.Code
+	ExecCode     exec.WasmExec
 }
 
-type codeManager struct {
+type CodeManager struct {
 	makeExecCode makeExecCodeFunc
-	codes        map[string]*contractCode
+	codes        map[string]*ContractCode
 	mutex        sync.Mutex
 }
 
-func newCodeManager(makeExec makeExecCodeFunc) *codeManager {
-	return &codeManager{
+func NewCodeManager(makeExec makeExecCodeFunc) *CodeManager {
+	return &CodeManager{
 		makeExecCode: makeExec,
-		codes:        make(map[string]*contractCode),
+		codes:        make(map[string]*ContractCode),
 	}
 }
 
-func (c *codeManager) GetExecCode(name string) (*contractCode, error) {
+func (c *CodeManager) GetExecCode(name string) (*ContractCode, error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	if _, ok := c.codes[name]; ok {
@@ -38,7 +38,7 @@ func (c *codeManager) GetExecCode(name string) (*contractCode, error) {
 	if err != nil {
 		return nil, err
 	}
-	code := &contractCode{
+	code := &ContractCode{
 		ContractName: name,
 		ExecCode:     execCode,
 	}
@@ -47,7 +47,7 @@ func (c *codeManager) GetExecCode(name string) (*contractCode, error) {
 	return code, nil
 }
 
-func (c *codeManager) RemoveCode(name string) {
+func (c *CodeManager) RemoveCode(name string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	code, ok := c.codes[name]

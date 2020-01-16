@@ -3,7 +3,7 @@ package fs
 import (
 	"os"
 
-	"github.com/BeDreamCoder/uwavm/runtime/go/js"
+	"github.com/BeDreamCoder/uwavm/wasm/runtime/go/js"
 )
 
 // Constants is the constants in fs

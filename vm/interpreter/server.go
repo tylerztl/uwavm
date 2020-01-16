@@ -1,4 +1,4 @@
-package bridge
+package interpreter
 
 import (
 	"context"
@@ -23,8 +23,8 @@ var (
 
 // Server represents memory RPC server
 type Server struct {
-	methods  map[string]*reflect.Method
-	vsyscall reflect.Value
+	methods map[string]*reflect.Method
+	syscall reflect.Value
 }
 
 func isContextType(tp reflect.Type) bool {
@@ -63,8 +63,8 @@ func parseMethods(syscall interface{}) map[string]*reflect.Method {
 // NewServer instances a new Server
 func NewServer(syscall interface{}) *Server {
 	return &Server{
-		methods:  parseMethods(syscall),
-		vsyscall: reflect.ValueOf(syscall),
+		methods: parseMethods(syscall),
+		syscall: reflect.ValueOf(syscall),
 	}
 }
 
@@ -96,7 +96,7 @@ func (s *Server) CallMethod(ctx context.Context, ctxid int64, method string, req
 		header.Ctxid = ctxid
 	}
 	ret := m.Func.Call([]reflect.Value{
-		s.vsyscall,
+		s.syscall,
 		reflect.ValueOf(ctx),
 		request,
 	})

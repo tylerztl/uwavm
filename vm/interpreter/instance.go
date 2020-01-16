@@ -1,12 +1,13 @@
-package vm
+package interpreter
 
 import (
 	"errors"
 
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/log"
-	"github.com/BeDreamCoder/uwavm/exec"
-	gowasm "github.com/BeDreamCoder/uwavm/runtime/go"
+	"github.com/BeDreamCoder/uwavm/vm"
+	"github.com/BeDreamCoder/uwavm/wasm/exec"
+	gowasm "github.com/BeDreamCoder/uwavm/wasm/runtime/go"
 )
 
 type vmInstance struct {
@@ -14,7 +15,7 @@ type vmInstance struct {
 	execCtx   exec.Context
 }
 
-func createInstance(ctx *bridge.ContractState, code *contractCode) (Instance, error) {
+func createInstance(ctx *bridge.ContractState, code *vm.ContractCode) (bridge.Instance, error) {
 	execCtx, err := code.ExecCode.NewContext(exec.DefaultContextConfig())
 	if err != nil {
 		log.GetLogger().Error("create contract context error", "error", err, "contract", ctx.ContractName)

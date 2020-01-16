@@ -10,7 +10,7 @@ import (
 
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/db/leveldb"
-	"github.com/BeDreamCoder/uwavm/wasm"
+	"github.com/BeDreamCoder/uwavm/vm"
 )
 
 var (
@@ -59,7 +59,7 @@ func run(modulePath string) error {
 
 	db := leveldb.NewProvider().GetDBHandle("uwavm")
 	bridge := bridge.NewBridge(db)
-	vm := wasm.NewVMManager(db, bridge)
+	vm := vm.NewVMManager(db, bridge)
 	bridge.RegisterExecutor("wasm", vm)
 	resp, err := vm.DeployContract(makeDeployArgs(modulePath))
 	//resp, err := vm.InvokeContract("query", makeInvokeArgs())
