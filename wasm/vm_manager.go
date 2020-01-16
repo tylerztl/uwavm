@@ -29,7 +29,7 @@ func NewVMManager(db db.Database, bridge *bridge.Bridge) *VMManager {
 
 // RegisterSyscallService implements bridge.Executor
 func (v *VMManager) RegisterSyscallService(syscall *bridge.SyscallService) {
-	vmimpl, err := vm.Open("uwasm", syscall, v.db)
+	vmimpl, err := vm.Open("uwavm", syscall, v.db)
 	if err != nil {
 		panic(err)
 	}

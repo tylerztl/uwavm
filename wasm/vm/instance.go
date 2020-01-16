@@ -29,6 +29,7 @@ func createInstance(ctx *bridge.ContractState, code *contractCode) (Instance, er
 		bridgeCtx: ctx,
 		execCtx:   execCtx,
 	}
+	instance.InitDebugWriter()
 	return instance, nil
 }
 
@@ -55,4 +56,10 @@ func (x *vmInstance) Release() {
 
 func (x *vmInstance) Abort(msg string) {
 	exec.Throw(exec.NewTrap(msg))
+}
+
+func (x *vmInstance) InitDebugWriter() {
+	instanceLogger := log.New("contract", x.bridgeCtx.ContractName, "ctxid", x.bridgeCtx.ID)
+	instanceLogWriter := newDebugWriter(instanceLogger)
+	exec.SetWriter(x.execCtx, instanceLogWriter)
 }

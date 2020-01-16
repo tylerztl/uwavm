@@ -75,10 +75,10 @@ func run(modulePath string) error {
 		return err
 	}
 
-	db := leveldb.NewProvider().GetDBHandle("uwasm")
+	db := leveldb.NewProvider().GetDBHandle("uwavm")
 	bridge := bridge.NewBridge(db)
 	vm := wasm.NewVMManager(db, bridge)
-	bridge.RegisterExecutor("uwasm", vm)
+	bridge.RegisterExecutor("wasm", vm)
 	resp, err := vm.DeployContract(makeDeployArgs(modulePath))
 
 	fmt.Println("Status:", resp.GetStatus())

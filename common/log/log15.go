@@ -35,7 +35,7 @@ func New(ctx ...interface{}) Logger {
 
 func GetLogger() Logger {
 	logOnce.Do(func() {
-		singleton = New("uwasm")
+		singleton = New("uwavm")
 	})
 	return singleton
 }
