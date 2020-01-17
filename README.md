@@ -29,7 +29,7 @@ cd output
 
 #### Deploy contract
 ```
-./uwavm contract deploy -n erc20 -l go -a '{"initSupply":"1000000"}' -p ../example/erc20/erc20.wasm -c alice
+./uwavm contract deploy -n erc20 -l go -a '{"initSupply":"1000000"}' -p ./wasm/erc20.wasm -c alice
 ```
 
 #### Query contract
