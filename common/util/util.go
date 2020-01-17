@@ -12,8 +12,6 @@ import (
 
 const (
 	InitContractMethod   = "initialize"
-	InvokeContractMethod = "invoke"
-	QueryContractMethod  = "query"
 )
 
 // CreateDirIfMissing creates a dir for dirPath if not already exists. If the dir is empty it returns true

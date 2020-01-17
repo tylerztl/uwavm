@@ -3,7 +3,6 @@ package vm
 import (
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/db"
-	"github.com/BeDreamCoder/uwavm/contract/go/pb"
 )
 
 // NewInstanceCreatorFunc instances a new InstanceCreator from InstanceCreatorConfig
@@ -19,9 +18,4 @@ type InstanceCreator interface {
 type CodeHandle interface {
 	GetExecCode(name string) (*ContractCode, error)
 	RemoveCode(name string)
-}
-
-type CallContract interface {
-	DeployContract(args map[string][]byte) (*pb.Response, error)
-	InvokeContract(method string, args map[string][]byte) (*pb.Response, error)
 }

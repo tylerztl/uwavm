@@ -12,6 +12,8 @@ require (
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.11 // indirect
 	github.com/pkg/errors v0.8.0
+	github.com/spf13/cobra v0.0.5
+	github.com/spf13/pflag v1.0.3
 	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/net v0.0.0-20181114220301-adae6a3d119a // indirect
 )

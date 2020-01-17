@@ -82,3 +82,11 @@ func (v *vmImpl) NewVM(state *ContractState) (Contract, error) {
 		release:  release,
 	}, nil
 }
+
+func (v *vmImpl) DeployContract(args map[string][]byte) (*pb.Response, error) {
+	return v.exec.DeployContract(args)
+}
+
+func (v *vmImpl) InvokeContract(method string, args map[string][]byte) (*pb.Response, error) {
+	return v.exec.InvokeContract(method, args)
+}

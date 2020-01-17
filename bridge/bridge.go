@@ -1,6 +1,8 @@
 package bridge
 
 import (
+	"sync"
+
 	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
 )
@@ -12,6 +14,7 @@ type Executor interface {
 	RegisterSyscallService(*SyscallService)
 	// NewCreatorInstance 根据合约Context返回合约虚拟机的一个实例
 	NewCreatorInstance(ctx *ContractState) (Instance, error)
+	CallContract
 }
 
 // Instance is an instance of a contract run
@@ -29,10 +32,16 @@ type Contract interface {
 	ReleaseCache() error
 }
 
+type CallContract interface {
+	DeployContract(args map[string][]byte) (*pb.Response, error)
+	InvokeContract(method string, args map[string][]byte) (*pb.Response, error)
+}
+
 // VirtualMachine define virtual machine interface
 type VirtualMachine interface {
 	GetName() string
 	NewVM(state *ContractState) (Contract, error)
+	CallContract
 }
 
 // Bridge 用于注册用户虚拟机以及向Xchain Core注册可被识别的vm.VirtualMachine
@@ -42,14 +51,20 @@ type Bridge struct {
 	vms     map[string]VirtualMachine
 }
 
+var bridgeInstance *Bridge
+var bridgeOnce sync.Once
+
 // New instances a new Bridge
-func NewBridge(db db.Database) *Bridge {
-	state := NewStateManager()
-	return &Bridge{
-		state:   state,
-		syscall: NewSyscallService(state, db),
-		vms:     make(map[string]VirtualMachine),
-	}
+func GetBridge(db db.Database) *Bridge {
+	bridgeOnce.Do(func() {
+		state := NewStateManager()
+		bridgeInstance = &Bridge{
+			state:   state,
+			syscall: NewSyscallService(state, db),
+			vms:     make(map[string]VirtualMachine),
+		}
+	})
+	return bridgeInstance
 }
 
 // RegisterExecutor register a Executor to Bridge
