@@ -15,18 +15,18 @@ git clone https://github.com/BeDreamCoder/uwavm.git
 ```
 2. Compile wasm contract
 ```
-cd example/erc20
-
-GOOS=js GOARCH=wasm go build -o erc20.wasm erc20.go
+make wasm
 ```
 3. Build uwavm executable program
 ```
-cd run
-
-go build -o uwavm
+make build
 ```
 
 ### Run
+```
+cd output
+```
+
 #### Deploy contract
 ```
 ./uwavm contract deploy -n erc20 -l go -a '{"initSupply":"1000000"}' -p ../example/erc20/erc20.wasm -c alice
