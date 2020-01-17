@@ -1,1 +1,43 @@
 # Universal WebAssembly Virtual Machine
+
+UWAVM is a WebAssembly VM in Go. 
+UWAVM provide tools to decode wasm binary files that compiled by golang, javascript, c/c++, rust.
+
+## Quick start
+
+### Requirements
+* Go 1.12.x or later
+
+### Build
+1. Clone the repository
+```
+git clone https://github.com/BeDreamCoder/uwavm.git
+```
+2. Compile wasm contract
+```
+cd example/erc20
+
+GOOS=js GOARCH=wasm go build -o erc20.wasm erc20.go
+```
+3. Build uwavm executable program
+```
+cd run
+
+go build -o uwavm
+```
+
+### Run
+#### Deploy contract
+```
+./uwavm contract deploy -n erc20 -l go -a '{"initSupply":"1000000"}' -p ../example/erc20/erc20.wasm -c alice
+```
+
+#### Query contract
+```
+./uwavm contract query -n erc20 -l go -a '{"action":"balanceOf","address":"alice"}' -c alice
+```
+
+#### Invoke contract
+```
+./uwavm contract invoke -n erc20 -l go -a '{"action":"transfer","to":"bob","amount":"100"}' -c alice
+```
