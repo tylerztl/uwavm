@@ -86,7 +86,7 @@ func (db *DB) Close() {
 		return
 	}
 	if err := db.db.Close(); err != nil {
-		logger.Error("Error closing leveldb", err)
+		logger.Error("Error closing leveldb", "error", err)
 	}
 	db.dbState = closed
 }
@@ -99,7 +99,7 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 		err = nil
 	}
 	if err != nil {
-		logger.Error("Error retrieving leveldb key", key, err)
+		logger.Error("Error retrieving leveldb key", "key", key, "error", err)
 		return nil, errors.Wrapf(err, "error retrieving leveldb key [%#v]", key)
 	}
 	return value, nil
@@ -109,7 +109,7 @@ func (db *DB) Get(key []byte) ([]byte, error) {
 func (db *DB) Put(key []byte, value []byte) error {
 	err := db.db.Put(key, value, db.writeOptsSync)
 	if err != nil {
-		logger.Error("Error writing leveldb key", key)
+		logger.Error("Error writing leveldb key", "key", key)
 		return errors.Wrapf(err, "error writing leveldb key [%#v]", key)
 	}
 	return nil
@@ -119,7 +119,7 @@ func (db *DB) Put(key []byte, value []byte) error {
 func (db *DB) Delete(key []byte) error {
 	err := db.db.Delete(key, db.writeOptsSync)
 	if err != nil {
-		logger.Error("Error deleting leveldb key", key)
+		logger.Error("Error deleting leveldb key", "key", key)
 		return errors.Wrapf(err, "error deleting leveldb key [%#v]", key)
 	}
 	return nil
@@ -193,7 +193,7 @@ func (f *FileLock) Unlock() {
 		return
 	}
 	if err := f.db.Close(); err != nil {
-		logger.Warn("unable to release the lock on file", f.filePath, err)
+		logger.Warn("unable to release the lock on file", "filePath", f.filePath, "error", err)
 		return
 	}
 	f.db = nil

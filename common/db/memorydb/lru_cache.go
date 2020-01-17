@@ -68,7 +68,7 @@ func (c *LRUCache) Get(key []byte) ([]byte, error) {
 		c.lru.MoveToFront(elem) // move node to head of lru list
 		return elem.Value.(*Pair).value, nil
 	}
-	logger.Error("Error retrieving memorydb key", key)
+	logger.Error("Error retrieving memorydb key", "key", key)
 	return nil, errors.Errorf("Error retrieving memorydb key: %v", key)
 }
 
@@ -95,7 +95,7 @@ func (c *LRUCache) Put(key []byte, value []byte) error {
 		c.evict()
 		return nil
 	}
-	logger.Error("Error writing memorydb key", key)
+	logger.Error("Error writing memorydb key", "key", key)
 	return errors.Errorf("Error writing memorydb key: %v", key)
 }
 
@@ -120,7 +120,7 @@ func (c *LRUCache) Delete(key []byte) error {
 		c.lru.Remove(elem)
 		delete(c.cache, key)
 	} else {
-		logger.Error("Error deleting memorydb key", key)
+		logger.Error("Error deleting memorydb key", "key", key)
 		return errors.Errorf("error deleting leveldb key [%#v]", key)
 	}
 	return nil

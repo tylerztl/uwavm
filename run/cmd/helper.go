@@ -57,7 +57,7 @@ func attachFlags(cmd *cobra.Command, names []string) {
 		if flag := flags.Lookup(name); flag != nil {
 			cmdFlags.AddFlag(flag)
 		} else {
-			log.GetLogger().Error(fmt.Sprintf("Could not find flag '%s' to attach to command '%s'", name, cmd.Name()))
+			log.GetLogger().Error("Could not find flag  to attach to command", "flag", name, "cmd", cmd.Name())
 		}
 	}
 }

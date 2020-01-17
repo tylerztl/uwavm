@@ -24,7 +24,7 @@ func init() {
 }
 
 func New(ctx ...interface{}) Logger {
-	uLog := log.New(ctx)
+	uLog := log.New(ctx...)
 	uLog.SetHandler(log.SyncHandler(log.MultiHandler(
 		log.StreamHandler(os.Stderr, log.LogfmtFormat()),
 		log.LvlFilterHandler(log.LvlError, log.Must.FileHandler(
@@ -35,7 +35,7 @@ func New(ctx ...interface{}) Logger {
 
 func GetLogger() Logger {
 	logOnce.Do(func() {
-		singleton = New("uwavm")
+		singleton = New("uwavm", "logger")
 	})
 	return singleton
 }
