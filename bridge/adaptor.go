@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
+	"github.com/BeDreamCoder/uwavm/vm/gas"
 )
 
 // ContractError indicates the error of the contract running result
@@ -40,6 +41,10 @@ func (c *contractHandle) Invoke(method string, args map[string][]byte) (*pb.Resp
 	}
 
 	return c.cts.Output, nil
+}
+
+func (c *contractHandle) ResourceUsed() gas.Limits {
+	return c.instance.ResourceUsed()
 }
 
 func (c *contractHandle) ReleaseCache() error {
@@ -83,10 +88,10 @@ func (v *vmImpl) NewVM(state *ContractState) (Contract, error) {
 	}, nil
 }
 
-func (v *vmImpl) DeployContract(args map[string][]byte) (*pb.Response, error) {
+func (v *vmImpl) DeployContract(args map[string][]byte) (*pb.Response, gas.Limits, error) {
 	return v.exec.DeployContract(args)
 }
 
-func (v *vmImpl) InvokeContract(method string, args map[string][]byte) (*pb.Response, error) {
+func (v *vmImpl) InvokeContract(method string, args map[string][]byte) (*pb.Response, gas.Limits, error) {
 	return v.exec.InvokeContract(method, args)
 }

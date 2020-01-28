@@ -43,12 +43,13 @@ func contractDeploy(cmd *cobra.Command, args []string) error {
 		return errors.New("not found VirtualMachine name wasm")
 	}
 
-	if resp, err := vm.DeployContract(makeDeployArgs()); err != nil {
+	if resp, resourceUsed, err := vm.DeployContract(makeDeployArgs()); err != nil {
 		return err
 	} else {
 		fmt.Println("Status:", resp.GetStatus())
 		fmt.Println("Message:", resp.GetMessage())
 		fmt.Println("Bdoy:", string(resp.GetBody()))
+		fmt.Println("Gas:", resourceUsed.TotalGas())
 		return nil
 	}
 }

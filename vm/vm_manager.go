@@ -8,6 +8,7 @@ import (
 	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/common/util"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
+	"github.com/BeDreamCoder/uwavm/vm/gas"
 	log "github.com/inconshreveable/log15"
 )
 
@@ -53,46 +54,46 @@ func (v *VMManager) verifyContractName(name string) error {
 }
 
 // DeployContract deploy contract and initialize contract
-func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error) {
+func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, gas.Limits, error) {
 	name := args["contract_name"]
 	if name == nil {
-		return nil, errors.New("bad contract name")
+		return nil, gas.Limits{}, errors.New("bad contract name")
 	}
 	contractName := string(name)
 	err := v.verifyContractName(contractName)
 	if err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 
 	code := args["contract_code"]
 	if code == nil {
-		return nil, errors.New("missing contract code")
+		return nil, gas.Limits{}, errors.New("missing contract code")
 	}
 
 	language := args["language"]
 	if language == nil {
-		return nil, errors.New("missing contract language")
+		return nil, gas.Limits{}, errors.New("missing contract language")
 	}
 
 	initArgsBuf := args["args"]
 	if initArgsBuf == nil {
-		return nil, errors.New("missing args field in args")
+		return nil, gas.Limits{}, errors.New("missing args field in args")
 	}
 	var initArgs map[string][]byte
 	if err = json.Unmarshal(initArgsBuf, &initArgs); err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 
 	caller := args["caller"]
 	if caller == nil {
-		return nil, errors.New("missing contract caller")
+		return nil, gas.Limits{}, errors.New("missing contract caller")
 	}
 
 	if err = v.db.Put(util.ContractCodeKey(contractName), code); err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 	if err = v.db.Put(util.ContractCodeDescKey(contractName), language); err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 
 	state := &bridge.ContractState{
@@ -101,45 +102,45 @@ func (v *VMManager) DeployContract(args map[string][]byte) (*pb.Response, error)
 		Caller:       string(caller),
 	}
 
-	out, err := v.invokeContract(state, util.InitContractMethod, initArgs)
+	out, resourceUsed, err := v.invokeContract(state, util.InitContractMethod, initArgs)
 	if err != nil {
 		if _, ok := err.(*bridge.ContractError); !ok {
 			v.vmimpl.RemoveCache(contractName)
 		}
 		log.Error("call contract initialize method error", "error", err, "contract", contractName)
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
-	return out, nil
+	return out, resourceUsed, nil
 }
 
-func (v *VMManager) InvokeContract(method string, args map[string][]byte) (*pb.Response, error) {
+func (v *VMManager) InvokeContract(method string, args map[string][]byte) (*pb.Response, gas.Limits, error) {
 	name := args["contract_name"]
 	if name == nil {
-		return nil, errors.New("bad contract name")
+		return nil, gas.Limits{}, errors.New("bad contract name")
 	}
 	contractName := string(name)
 	err := v.verifyContractName(contractName)
 	if err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 
 	caller := args["caller"]
 	if caller == nil {
-		return nil, errors.New("missing contract caller")
+		return nil, gas.Limits{}, errors.New("missing contract caller")
 	}
 
 	language := args["language"]
 	if language == nil {
-		return nil, errors.New("missing contract language")
+		return nil, gas.Limits{}, errors.New("missing contract language")
 	}
 
 	argsBuf := args["args"]
 	if argsBuf == nil {
-		return nil, errors.New("missing args field in args")
+		return nil, gas.Limits{}, errors.New("missing args field in args")
 	}
 	var invokeArgs map[string][]byte
 	if err = json.Unmarshal(argsBuf, &invokeArgs); err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 
 	state := &bridge.ContractState{
@@ -148,30 +149,30 @@ func (v *VMManager) InvokeContract(method string, args map[string][]byte) (*pb.R
 		Caller:       string(caller),
 	}
 
-	out, err := v.invokeContract(state, method, invokeArgs)
+	out, resourceUsed, err := v.invokeContract(state, method, invokeArgs)
 	if err != nil {
 		if _, ok := err.(*bridge.ContractError); !ok {
 			v.vmimpl.RemoveCache(contractName)
 		}
 		log.Error("call contract initialize method error", "error", err, "contract", contractName)
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
-	return out, nil
+	return out, resourceUsed, nil
 }
 
-func (v *VMManager) invokeContract(state *bridge.ContractState, method string, args map[string][]byte) (*pb.Response, error) {
+func (v *VMManager) invokeContract(state *bridge.ContractState, method string, args map[string][]byte) (*pb.Response, gas.Limits, error) {
 	vm, ok := v.bridge.GetVirtualMachine("wasm")
 	if !ok {
-		return nil, errors.New("wasm vm not registered")
+		return nil, gas.Limits{}, errors.New("wasm vm not registered")
 	}
 
 	ctx, err := vm.NewVM(state)
 	if err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
 	out, err := ctx.Invoke(method, args)
 	if err != nil {
-		return nil, err
+		return nil, gas.Limits{}, err
 	}
-	return out, nil
+	return out, ctx.ResourceUsed(), nil
 }

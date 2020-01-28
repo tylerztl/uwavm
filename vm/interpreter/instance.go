@@ -6,6 +6,7 @@ import (
 	"github.com/BeDreamCoder/uwavm/bridge"
 	"github.com/BeDreamCoder/uwavm/common/log"
 	"github.com/BeDreamCoder/uwavm/vm"
+	"github.com/BeDreamCoder/uwavm/vm/gas"
 	"github.com/BeDreamCoder/uwavm/wasm/exec"
 	gowasm "github.com/BeDreamCoder/uwavm/wasm/runtime/go"
 )
@@ -49,6 +50,17 @@ func (x *vmInstance) Exec(function string) error {
 		log.GetLogger().Error("exec contract error", "error", err, "contract", x.bridgeCtx.ContractName)
 	}
 	return err
+}
+
+func (x *vmInstance) ResourceUsed() gas.Limits {
+	limits := gas.Limits{
+		Cpu: x.execCtx.GasUsed(),
+	}
+	mem := x.execCtx.Memory()
+	if mem != nil {
+		limits.Memory = int64(len(mem))
+	}
+	return limits
 }
 
 func (x *vmInstance) Release() {

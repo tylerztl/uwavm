@@ -42,12 +42,13 @@ func contractInvokeOrQuery(cmd *cobra.Command, args []string, method string) err
 		return errors.New("not found VirtualMachine name wasm")
 	}
 
-	if resp, err := vm.InvokeContract(method, makeInvokeOrQueryArgs()); err != nil {
+	if resp, resourceUsed, err := vm.InvokeContract(method, makeInvokeOrQueryArgs()); err != nil {
 		return err
 	} else {
 		fmt.Println("Status:", resp.GetStatus())
 		fmt.Println("Message:", resp.GetMessage())
 		fmt.Println("Bdoy:", string(resp.GetBody()))
+		fmt.Println("Gas:", resourceUsed.TotalGas())
 		return nil
 	}
 }

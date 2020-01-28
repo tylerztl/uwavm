@@ -5,6 +5,7 @@ import (
 
 	"github.com/BeDreamCoder/uwavm/common/db"
 	"github.com/BeDreamCoder/uwavm/contract/go/pb"
+	"github.com/BeDreamCoder/uwavm/vm/gas"
 )
 
 // Executor 为用户态虚拟机工厂类
@@ -21,6 +22,8 @@ type Executor interface {
 type Instance interface {
 	// Exec根据ctx里面的参数执行合约代码
 	Exec(function string) error
+	// ResourceUsed returns the resource used by contract
+	ResourceUsed() gas.Limits
 	// ReleaseCache releases contract instance
 	Release()
 	// Abort terminates running contract with error message
@@ -29,12 +32,13 @@ type Instance interface {
 
 type Contract interface {
 	Invoke(method string, args map[string][]byte) (*pb.Response, error)
+	ResourceUsed() gas.Limits
 	ReleaseCache() error
 }
 
 type CallContract interface {
-	DeployContract(args map[string][]byte) (*pb.Response, error)
-	InvokeContract(method string, args map[string][]byte) (*pb.Response, error)
+	DeployContract(args map[string][]byte) (*pb.Response, gas.Limits, error)
+	InvokeContract(method string, args map[string][]byte) (*pb.Response, gas.Limits, error)
 }
 
 // VirtualMachine define virtual machine interface

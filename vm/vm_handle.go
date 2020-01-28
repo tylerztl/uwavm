@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/BeDreamCoder/uwavm/bridge"
+	"github.com/BeDreamCoder/uwavm/vm/gas"
 )
 
 type vmHandle struct {
@@ -32,6 +33,10 @@ func (v *vmHandle) Exec(function string) error {
 		return err
 	}
 	return v.vmInstance.Exec(entry)
+}
+
+func (v *vmHandle) ResourceUsed() gas.Limits {
+	return v.vmInstance.ResourceUsed()
 }
 
 func (v *vmHandle) Release() {
