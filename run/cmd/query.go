@@ -15,12 +15,13 @@ func QueryCmd() *cobra.Command {
 		Long:      "Query the specified wasm contract.",
 		ValidArgs: []string{"1"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return contractInvokeOrQuery(cmd, args, queryCmdName)
+			return contractInvokeOrQuery(cmd, args, contractMethod)
 		},
 	}
 	flagList := []string{
 		"name",
 		"language",
+		"method",
 		"args",
 		"caller",
 	}

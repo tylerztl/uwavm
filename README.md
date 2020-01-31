@@ -34,10 +34,10 @@ cd output
 
 #### Query contract
 ```
-./uwavm contract query -n erc20 -l go -a '{"action":"balanceOf","address":"alice"}' -c alice
+./uwavm contract query -n erc20 -l go -m query -a '{"action":"balanceOf","address":"alice"}' -c alice
 ```
 
 #### Invoke contract
 ```
-./uwavm contract invoke -n erc20 -l go -a '{"action":"transfer","to":"bob","amount":"100"}' -c alice
+./uwavm contract invoke -n erc20 -l go -m invoke -a '{"action":"transfer","to":"bob","amount":"100"}' -c alice
 ```

@@ -17,6 +17,7 @@ import (
 var (
 	contractName   string
 	contractLang   string
+	contractMethod string
 	contractArgs   string
 	contractPath   string
 	contractCaller string
@@ -43,6 +44,8 @@ func resetFlags() {
 		fmt.Sprint("Name of the contract"))
 	flags.StringVarP(&contractLang, "language", "l", "go",
 		fmt.Sprintf("Language the contract is written in"))
+	flags.StringVarP(&contractMethod, "method", "m", "invoke",
+		fmt.Sprintf("Invoke contract method name"))
 	flags.StringVarP(&contractArgs, "args", "a", "{}",
 		fmt.Sprintf("Constructor message for the contract initialize args in JSON format"))
 	flags.StringVarP(&contractPath, "path", "p", "",
@@ -74,6 +77,10 @@ func checkContractCmdParams(cmd *cobra.Command) error {
 	if cmd.Name() == deployCmdName {
 		if contractPath == "" {
 			return errors.Errorf("must provide contract wasm file path")
+		}
+	} else {
+		if contractMethod == "" {
+			return errors.Errorf("must provide contract method name")
 		}
 	}
 
