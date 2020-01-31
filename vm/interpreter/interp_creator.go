@@ -9,6 +9,7 @@ import (
 	"github.com/BeDreamCoder/uwavm/common/util"
 	"github.com/BeDreamCoder/uwavm/vm"
 	"github.com/BeDreamCoder/uwavm/wasm/exec"
+	"github.com/BeDreamCoder/uwavm/wasm/runtime/emscripten"
 	gowasm "github.com/BeDreamCoder/uwavm/wasm/runtime/go"
 )
 
@@ -34,6 +35,7 @@ func (x *interpCreator) makeExecCode(contractName string) (exec.WasmExec, error)
 	}
 	resolver := exec.NewMultiResolver(
 		gowasm.NewResolver(),
+		emscripten.NewResolver(),
 		newSyscallResolver(x.syscallService))
 	return exec.NewInterpCode(codebuf, resolver)
 }

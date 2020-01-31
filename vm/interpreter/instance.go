@@ -8,6 +8,7 @@ import (
 	"github.com/BeDreamCoder/uwavm/vm"
 	"github.com/BeDreamCoder/uwavm/vm/gas"
 	"github.com/BeDreamCoder/uwavm/wasm/exec"
+	"github.com/BeDreamCoder/uwavm/wasm/runtime/emscripten"
 	gowasm "github.com/BeDreamCoder/uwavm/wasm/runtime/go"
 )
 
@@ -25,6 +26,11 @@ func createInstance(ctx *bridge.ContractState, code *vm.ContractCode) (bridge.In
 	switch ctx.Language {
 	case "go":
 		gowasm.RegisterRuntime(execCtx)
+	case "c":
+		err = emscripten.Init(execCtx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	execCtx.SetUserData(contextIDKey, ctx.ID)
 	instance := &vmInstance{
