@@ -103,23 +103,23 @@ func newERC20() *erc20 {
 }
 
 func (e *erc20) Initialize(ctx code.Context) code.Response {
-	initSupplyStr := string(ctx.Args()["initSupply"])
-	if initSupplyStr == "" {
-		return code.Errors("missing initSupply")
+	totalSupplyStr := string(ctx.Args()["totalSupply"])
+	if totalSupplyStr == "" {
+		return code.Errors("missing totalSupply")
 	}
 	caller := ctx.Caller()
-	initSupply, ok := big.NewInt(0).SetString(initSupplyStr, 10)
+	totalSupply, ok := big.NewInt(0).SetString(totalSupplyStr, 10)
 	if !ok {
 		return code.Errors("bad initSupply number")
 	}
 
-	if initSupply.Cmp(big.NewInt(0)) <= 0 {
+	if totalSupply.Cmp(big.NewInt(0)) <= 0 {
 		return code.Errors("amount must bigger than 0")
 	}
 
 	e.xdb.SetContext(ctx)
-	e.totalSupply.Set(initSupply)
-	e.balanceOf.Get(caller).Set(initSupply)
+	e.totalSupply.Set(totalSupply)
+	e.balanceOf.Get(caller).Set(totalSupply)
 
 	err := e.xdb.Commit()
 	if err != nil {

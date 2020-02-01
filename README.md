@@ -13,11 +13,7 @@ UWAVM provide tools to decode wasm binary files that compiled by golang, javascr
 ```
 git clone https://github.com/BeDreamCoder/uwavm.git
 ```
-2. Compile wasm contract
-```
-make wasm
-```
-3. Build uwavm executable program
+2. Build uwavm executable program
 ```
 make build
 ```
@@ -26,10 +22,10 @@ make build
 ```
 cd output
 ```
-
+1. Golang contract
 #### Deploy contract
 ```
-./uwavm contract deploy -n erc20 -l go -a '{"initSupply":"1000000"}' -p ./wasm/erc20.wasm -c alice
+./uwavm contract deploy -n erc20 -l go -a '{"totalSupply":"1000000"}' -p ../testdata/erc20_go.wasm -c alice
 ```
 
 #### Query contract
@@ -40,4 +36,19 @@ cd output
 #### Invoke contract
 ```
 ./uwavm contract invoke -n erc20 -l go -m invoke -a '{"action":"transfer","to":"bob","amount":"100"}' -c alice
+```
+2. C++ contract
+#### Deploy contract
+```
+./uwavm contract deploy -n erc20 -l c -a '{"totalSupply":"1000000"}' -p ../testdata/erc20_c.wasm -c alice
+```
+
+#### Query contract
+```
+./uwavm contract query -n erc20 -l c -m balance -a '{"caller":"alice"}' -c alice
+```
+
+#### Invoke contract
+```
+./uwavm contract invoke -n erc20 -l c -m transfer -a '{"from":"alice","to":"bob","amount":"100"}' -c alice
 ```

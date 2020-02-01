@@ -142,9 +142,9 @@ DEFINE_METHOD(ERC20, transfer) {
         return;
     }
 
-    const std::string& token_str = ctx->arg("token");
+    const std::string& token_str = ctx->arg("amount");
     if (token_str.empty()) {
-        ctx->error("missing token");
+        ctx->error("missing amount");
         return;
     }
     int token = atoi(token_str.c_str());
