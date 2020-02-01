@@ -21,4 +21,6 @@
 # idea
 .idea
 
+contract/cpp/build
+
 output
